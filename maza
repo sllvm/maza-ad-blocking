@@ -12,6 +12,7 @@ THIS_OS=$(uname -mrs)
 PROGNAME=$(basename "$0")
 [[ -z "${XDG_CONFIG_HOME}" ]] && CONFIG=$HOME/.maza/ || CONFIG=$XDG_CONFIG_HOME/maza
 HOST_FILE=/etc/hosts
+ADD_HOST_FILE="$CONFIG/additional_hosts"
 COLOR_RED=$(tput setaf 1)
 COLOR_GREEN=$(tput setaf 2)
 COLOR_RESET=$(tput sgr0)
@@ -123,7 +124,8 @@ update() {
 start() {
     update
     # Add List to host file
-    cat "$CONFIG$LIST_DNSMASQ" | sudo tee  "$HOST_FILE"
+    #cat "$CONFIG$LIST_DNSMASQ" | sudo tee  "$HOST_FILE"
+    cat "$CONFIG$LIST_DNSMASQ" | sudo tee  "$ADD_HOST_FILE"
     # Notify user
     echo "${COLOR_GREEN}ENABLED!${COLOR_RESET}"
 }
