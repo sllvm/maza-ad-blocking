@@ -2,11 +2,11 @@
 
 # START
 set -e
-
 # VARIABLES
 URL_DNS_LIST="https://pgl.yoyo.org/adservers/serverlist.php?showintro=0&mimetype=plaintext"
-URL_DNS_LIST_1="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
-URL_DNS_LIST_2="https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt"
+URL_DNS_LIST_1="https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt"
+#URL_DNS_LIST_2="https://big.oisd.nl/"
+#URL_DNS_LIST_2="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
 NAME_OSX="Darwin"
 THIS_OS=$(uname -mrs)
 PROGNAME=$(basename "$0")
@@ -78,21 +78,23 @@ update() {
     rm -f "$CONFIG$LIST"
     rm -f "$CONFIG$LIST_DNSMASQ"
     mkdir -p "$CONFIG"
-    touch "$CONFIG$LIST"
+#    touch "$CONFIG$LIST"
     # Download DNS list
     curl -L -s "$URL_DNS_LIST" -o "$CONFIG$LIST"
     curl -L -s "$URL_DNS_LIST_1" >> "$CONFIG$LIST"
-    curl -L -s "$URL_DNS_LIST_2" >> "$CONFIG$LIST"
+#    curl -L -s "$URL_DNS_LIST_2" >> "$CONFIG$LIST"
     # Clear list
     ## Remove comments
-    custom-sed -i.bak '/^#/ d' "$CONFIG$LIST"
+    sed -i.bak '/^#/ d' "$CONFIG$LIST"
+    ## remove blank lines
+    sed -i.bak '/^$/ d' "$CONFIG$LIST"
     # Make dnsmasq format
     ## 127.0.0.1 doubleclick.net to address=/doubleclick.net/127.0.0.1
     cp "$CONFIG$LIST" "$CONFIG$LIST_DNSMASQ"
-    custom-sed -i.bak 's/127.0.0.1 /address=\//g' "$CONFIG$LIST_DNSMASQ"
-    custom-sed -i.bak 's/$/\/127.0.0.1/g' "$CONFIG$LIST_DNSMASQ"
+    custom-sed -E -i.bak 's/(127.0.0.1|0.0.0.0) /address=\//g' "$CONFIG$LIST_DNSMASQ"
+    sed -i.bak 's/$/\/0.0.0.0/g' "$CONFIG$LIST_DNSMASQ"
     ## Add start tag DNS list in first line
-    custom-sed -i.bak "1i\\$AUTHOR" "$CONFIG$LIST"
+    custom-sed -i.bak "1i\$AUTHOR" "$CONFIG$LIST"
     custom-sed -i.bak "1i\\$PROJECT" "$CONFIG$LIST"
     custom-sed -i.bak "1i\\$START_TAG" "$CONFIG$LIST"
     ## Add end tag DNS list in first line
@@ -111,8 +113,10 @@ update() {
 	done < "$CONFIG/$IGNORE_LIST_FILE"
     fi
     # Remove temp file
-    rm "$CONFIG$LIST.bak"
-    rm "$CONFIG$LIST_DNSMASQ.bak"
+    cp "$CONFIG$LIST.bak" "$CONFIG$LIST"
+    cp "$CONFIG$LIST_DNSMASQ.bak" "$CONFIG$LIST_DNSMASQ"
+#    rm "$CONFIG$LIST.bak"
+#    rm "$CONFIG$LIST_DNSMASQ.bak"
     # Notify user
     echo "${COLOR_GREEN}List updated!${COLOR_RESET}"
 }
@@ -120,7 +124,7 @@ update() {
 start() {
     update
     # Add List to host file
-    cat "$CONFIG/$LIST" >> "$HOST_FILE"
+    cat "$CONFIG$LIST_DNSMASQ" | sudo tee  "$HOST_FILE"
     # Notify user
     echo "${COLOR_GREEN}ENABLED!${COLOR_RESET}"
 }
