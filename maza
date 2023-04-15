@@ -86,13 +86,12 @@ update() {
     # Clear list
     ## Remove comments
     sed -i.bak '/^#/ d' "$CONFIG$LIST"
-    ## remove blank lines
     sed -i.bak '/^$/ d' "$CONFIG$LIST"
     # Make dnsmasq format
     ## 127.0.0.1 doubleclick.net to address=/doubleclick.net/127.0.0.1
     cp "$CONFIG$LIST" "$CONFIG$LIST_DNSMASQ"
-    custom-sed -E -i.bak 's/(127.0.0.1|0.0.0.0) /address=\//g' "$CONFIG$LIST_DNSMASQ"
-    sed -i.bak 's/$/\/0.0.0.0/g' "$CONFIG$LIST_DNSMASQ"
+#    custom-sed -E -i.bak 's/(127.0.0.1|0.0.0.0) /local=\//g' "$CONFIG$LIST_DNSMASQ"
+#    custom-sed -i.bak 's/$/\//g' "$CONFIG$LIST_DNSMASQ"
     ## Add start tag DNS list in first line
     custom-sed -i.bak "1i\$AUTHOR" "$CONFIG$LIST"
     custom-sed -i.bak "1i\\$PROJECT" "$CONFIG$LIST"
@@ -115,8 +114,8 @@ update() {
     # Remove temp file
     cp "$CONFIG$LIST.bak" "$CONFIG$LIST"
     cp "$CONFIG$LIST_DNSMASQ.bak" "$CONFIG$LIST_DNSMASQ"
-#    rm "$CONFIG$LIST.bak"
-#    rm "$CONFIG$LIST_DNSMASQ.bak"
+    rm "$CONFIG$LIST.bak"
+    rm "$CONFIG$LIST_DNSMASQ.bak"
     # Notify user
     echo "${COLOR_GREEN}List updated!${COLOR_RESET}"
 }
