@@ -6,6 +6,7 @@ set -e
 # VARIABLES
 URL_DNS_LIST="https://pgl.yoyo.org/adservers/serverlist.php?showintro=0&mimetype=plaintext"
 URL_DNS_LIST_1="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+URL_DNS_LIST_2="https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt"
 NAME_OSX="Darwin"
 THIS_OS=$(uname -mrs)
 PROGNAME=$(basename "$0")
@@ -77,9 +78,11 @@ update() {
     rm -f "$CONFIG$LIST"
     rm -f "$CONFIG$LIST_DNSMASQ"
     mkdir -p "$CONFIG"
+    touch "$CONFIG$LIST"
     # Download DNS list
     curl -L -s "$URL_DNS_LIST" -o "$CONFIG$LIST"
     curl -L -s "$URL_DNS_LIST_1" >> "$CONFIG$LIST"
+    curl -L -s "$URL_DNS_LIST_2" >> "$CONFIG$LIST"
     # Clear list
     ## Remove comments
     custom-sed -i.bak '/^#/ d' "$CONFIG$LIST"
