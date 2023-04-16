@@ -6,7 +6,7 @@ set -e
 URL_DNS_LIST="https://pgl.yoyo.org/adservers/serverlist.php?showintro=0&mimetype=plaintext"
 URL_DNS_LIST_1="https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt"
 #URL_DNS_LIST_2="https://big.oisd.nl/"
-#URL_DNS_LIST_2="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+URL_DNS_LIST_2="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
 NAME_OSX="Darwin"
 THIS_OS=$(uname -mrs)
 PROGNAME=$(basename "$0")
@@ -83,16 +83,22 @@ update() {
     # Download DNS list
     curl -L -s "$URL_DNS_LIST" -o "$CONFIG$LIST"
     curl -L -s "$URL_DNS_LIST_1" >> "$CONFIG$LIST"
-#    curl -L -s "$URL_DNS_LIST_2" >> "$CONFIG$LIST"
+    curl -L -s "$URL_DNS_LIST_2" >> "$CONFIG$LIST"
     # Clear list
     ## Remove comments
     sed -i.bak '/^#/ d' "$CONFIG$LIST"
+#    " \s#.*\/"
+    custom-sed -E -i.bak 's/\W#.*//' "$CONFIG$LIST"
+    #custom-sed -E -i.bak 's/ \s#.*//' "$CONFIG$LIST"
     sed -i.bak '/^$/ d' "$CONFIG$LIST"
+    sed -i.bak '/255.255.255.255.*/ d' "$CONFIG$LIST"
+    sed -i.bak '/:.*/ d' "$CONFIG$LIST"
+    sed -i.bak '/.*:.*/ d' "$CONFIG$LIST"
     # Make dnsmasq format
     ## 127.0.0.1 doubleclick.net to address=/doubleclick.net/127.0.0.1
     cp "$CONFIG$LIST" "$CONFIG$LIST_DNSMASQ"
-#    custom-sed -E -i.bak 's/(127.0.0.1|0.0.0.0) /local=\//g' "$CONFIG$LIST_DNSMASQ"
-#    custom-sed -i.bak 's/$/\//g' "$CONFIG$LIST_DNSMASQ"
+    custom-sed -E -i.bak 's/(127.0.0.1|0.0.0.0) /address=\//g' "$CONFIG$LIST_DNSMASQ"
+    custom-sed -E -i.bak 's/(address.*$)/\1\/#/g' "$CONFIG$LIST_DNSMASQ"
     ## Add start tag DNS list in first line
     custom-sed -i.bak "1i\$AUTHOR" "$CONFIG$LIST"
     custom-sed -i.bak "1i\\$PROJECT" "$CONFIG$LIST"
