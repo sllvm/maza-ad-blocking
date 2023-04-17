@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
+# debug dnsmasq  sudo dnsmasq --no-daemon --log-queries
+
 
 # START
 set -e
 # VARIABLES
 URL_DNS_LIST="https://pgl.yoyo.org/adservers/serverlist.php?showintro=0&mimetype=plaintext"
 URL_DNS_LIST_1="https://raw.githubusercontent.com/d3ward/toolz/master/src/d3host.txt"
-URL_DNS_LIST_3="https://big.oisd.nl/dnsmasq"
+URL_DNS_LIST_3="https://big.oisd.nl/dnsmasq2"
 #URL_DNS_LIST_2="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
 NAME_OSX="Darwin"
 THIS_OS=$(uname -mrs)
@@ -84,7 +86,7 @@ update() {
     curl -L -s "$URL_DNS_LIST" -o "$CONFIG$LIST"
     curl -L -s "$URL_DNS_LIST_1" >> "$CONFIG$LIST"
 #    curl -L -s "$URL_DNS_LIST_2" >> "$CONFIG$LIST"
-    curl -L -s "$URL_DNS_LIST_3" -o "$CONFIG$LIST.oisd"
+    curl -L -s "$URL_DNS_LIST_3" -o "$CONFIG$LIST_DNSMASQ.oisd"
     # Clear list
     ## Remove comments
     sed -i.bak '/^#/ d' "$CONFIG$LIST"
@@ -98,9 +100,9 @@ update() {
     # Make dnsmasq format
     ## 127.0.0.1 doubleclick.net to address=/doubleclick.net/127.0.0.1
     cp "$CONFIG$LIST" "$CONFIG$LIST_DNSMASQ"
-    custom-sed -E -i.bak 's/(127.0.0.1|0.0.0.0) /server=\//g' "$CONFIG$LIST_DNSMASQ"
-    custom-sed -E -i.bak 's/(server.*$)/\1\//g' "$CONFIG$LIST_DNSMASQ"
-    cat "$CONFIG$LIST.oisd" >> "$CONFIG$LIST_DNSMASQ"
+    custom-sed -E -i.bak 's/(127.0.0.1|0.0.0.0) /local=\//g' "$CONFIG$LIST_DNSMASQ"
+    custom-sed -E -i.bak 's/(local.*$)/\1\//g' "$CONFIG$LIST_DNSMASQ"
+    cat "$CONFIG$LIST_DNSMASQ.oisd" >> "$CONFIG$LIST_DNSMASQ"
     #remove duplicates
     cat "$CONFIG$LIST_DNSMASQ" | sort | uniq >> "$CONFIG$LIST_DNSMASQ.sort"
     sudo cp "$CONFIG$LIST_DNSMASQ.sort" "$CONFIG$LIST_DNSMASQ"
@@ -130,6 +132,7 @@ update() {
     rm "$CONFIG$LIST.bak"
     rm "$CONFIG$LIST_DNSMASQ.bak"
     rm "$CONFIG$LIST_DNSMASQ.sort"
+    rm "$CONFIG$LIST_DNSMASQ.oisd"
     # Notify user
     echo "${COLOR_GREEN}List updated!${COLOR_RESET}"
 }
